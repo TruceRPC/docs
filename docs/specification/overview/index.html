@@ -49,7 +49,7 @@ types:      # The type definitions of the Truce service being defined.
     versions: [string] # array of http version strings e.g. [&quot;1.0&quot;, &quot;1.1&quot;, &quot;2.0&quot;]
     prefix: string     # prefix for all generated endpoints e.g. &quot;/api/v1&quot;.
     errors: {
-      &lt;status&gt;: {      # status code to defined type mapping for.
+      string: {        # status code to represent error on the wire.
         type: string   # reference to an error defined in &quot;types&quot; section.
       }
     }
@@ -58,7 +58,35 @@ types:      # The type definitions of the Truce service being defined.
     arguments:  [] # see function/arguments below.
     return:     {} # see function/return below.
     transports: {} # see function/transports below.
-</code></pre><h4 id=functionarguments>function/arguments<a href=#functionarguments class=anchor aria-hidden=true>#</a></h4><p>TODO(georgemac)</p><h4 id=functionreturn>function/return<a href=#functionreturn class=anchor aria-hidden=true>#</a></h4><p>TODO(georgemac)</p><h4 id=functiontransports>function/transports<a href=#functiontransports class=anchor aria-hidden=true>#</a></h4><p>TODO(georgemac)</p><h3 id=types>Types<a href=#types class=anchor aria-hidden=true>#</a></h3><pre><code class=language-cue data-lang=cue>types:
+</code></pre><h4 id=functionarguments>function/arguments<a href=#functionarguments class=anchor aria-hidden=true>#</a></h4><p>Argument is an ordered list of the arguments to the function.
+Each argument has a name, which is referenced in the function transport definitions for mapping.
+They also have a <a href=#Types>type</a>.</p><pre><code class=language-cue data-lang=cue>arguments: [
+    {
+      name: string
+      type: &lt;type&gt;
+    }
+  ]
+</code></pre><h4 id=functionreturn>function/return<a href=#functionreturn class=anchor aria-hidden=true>#</a></h4><p>The return object of a truce function is also an argument type. Functions in Truce have a single return argument (and an implicit return <code>error</code>).
+The return argument has a name, though currently only marshalling that result to the response body is supported.
+So no mapping capabilities exists for the transport yet. It is just implied this will be marshalled to the response body.</p><pre><code class=language-cue data-lang=cue>return: {
+    name: string
+    type: &lt;type&gt;
+  }
+</code></pre><h4 id=functiontransports>function/transports<a href=#functiontransports class=anchor aria-hidden=true>#</a></h4><p>Currently, Truce support <code>http</code> as the only transport protocol. Though it leaves space incase others become desireable.
+So the first key beneath <code>transports</code> is <code>http</code> and it is optional. Incase you want to omit the function from any target generated output.</p><p>The <code>http</code> object describes how the function becomes accessible on the wire.</p><p>It allows you to express:</p><ul><li>The path on which the function matches.</li><li>The HTTPmethod (i.e. the verb &lsquo;GET&rsquo;, &lsquo;POST&rsquo; etc).</li><li>The argument mappings from the request onto the parent function call.</li></ul><pre><code class=language-cue data-lang=cue>transports:
+  http?:
+    path:   string # e.g. /resource/{id}
+    method: string # e.g. GET or POST
+    arguments:
+      string: { # argument name to be mapped to (see [function arguments](#function/arguments))
+          from: &quot;body&quot;  |
+                &quot;path&quot;  |
+                &quot;query&quot; |
+                &lt;empty&gt; # used to signify which part of the request the argument is being mapped from.
+          var:   string # used for from == (&quot;path&quot; or &quot;query&quot;) to identify the parameter in the path or query from which to map.
+          value: string # used when from is empty to pass a constant value
+        }
+</code></pre><h3 id=types>Types<a href=#types class=anchor aria-hidden=true>#</a></h3><p>Truce has support for:</p><ul><li>Primitive types:<ul><li>string</li><li>bool</li><li>int</li><li>float64</li><li>byte</li></ul></li><li>Slice of types (e.g. []int or []Model)</li><li>Maps of types (e.g. map[string]Model)</li><li>Custom Struct definition (defined under <code>types:</code>).</li><li>Pointers to Structs.</li></ul><pre><code class=language-cue data-lang=cue>types:
   string:                     # a string defining the types name.
     type: *&quot;struct&quot; | &quot;error&quot; # a type of either &quot;struct&quot; or &quot;error&quot; (default &quot;struct&quot;).
     fields: {
@@ -66,4 +94,4 @@ types:      # The type definitions of the Truce service being defined.
         type: string          # a string definined the fields type.
       }
     }
-</code></pre><div class="docs-navigation d-flex justify-content-between"><a href=https://docs.truce.dev/docs/prologue/introduction/><div class="card my-1"><div class="card-body py-2">&larr; Introduction</div></div></a><a class=ml-auto href=https://docs.truce.dev/docs/prologue/quick-start/><div class="card my-1"><div class="card-body py-2">Quick Start &rarr;</div></div></a></div></main></div></div></div><footer class="footer text-muted"><div class=container><div class=row><div class="col-lg-8 order-last order-lg-first"><ul class=list-inline><li class=list-inline-item>Powered by <a href=https://gohugo.io/>Hugo</a>, and <a href=https://getdoks.org/>Doks</a></li></ul></div><div class="col-lg-8 order-first order-lg-last text-lg-right"><ul class=list-inline></ul></div></div></div></footer><script src=https://docs.truce.dev/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js integrity="sha512-9rSE9VatHzvPYGEIITmi8h+nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin=anonymous defer></script><script src=https://docs.truce.dev/index.min.1587bcfb71a47e86efea20ca9da2d26c8ca6d88193cb120804a7a754a92e0d67fed081176249ef97d938b00ee216dffb5ac56c12abe77333de69304bbe13123a.js integrity="sha512-FYe8+3Gkfobv6iDKnaLSbIym2IGTyxIIBKenVKkuDWf+0IEXYknvl9k4sA7iFt/7WsVsEqvnczPeaTBLvhMSOg==" crossorigin=anonymous defer></script></body></html>
+</code></pre><div class="docs-navigation d-flex justify-content-between"><a href=https://docs.truce.dev/docs/prologue/introduction/><div class="card my-1"><div class="card-body py-2">&larr; Introduction</div></div></a><a class=ml-auto href=https://docs.truce.dev/docs/prologue/quick-start/><div class="card my-1"><div class="card-body py-2">Quick Start &rarr;</div></div></a></div></main></div></div></div><footer class="footer text-muted"><div class=container><div class=row><div class="col-lg-8 order-last order-lg-first"><ul class=list-inline><li class=list-inline-item>Powered by <a href=https://gohugo.io/>Hugo</a>, and <a href=https://getdoks.org/>Doks</a></li></ul></div><div class="col-lg-8 order-first order-lg-last text-lg-right"><ul class=list-inline></ul></div></div></div></footer><script src=https://docs.truce.dev/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js integrity="sha512-9rSE9VatHzvPYGEIITmi8h+nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin=anonymous defer></script><script src=https://docs.truce.dev/index.min.a952936a5223e53c0252e46bdc2ed9c93cd8523e48c98cd61b82c53bc614d34277113e85e713d5ae3f12d7ad9663630530e8783791de2339fefc65dab8b991e1.js integrity="sha512-qVKTalIj5TwCUuRr3C7ZyTzYUj5IyYzWG4LFO8YU00J3ET6F5xPVrj8S162WY2MFMOh4N5HeIzn+/GXauLmR4Q==" crossorigin=anonymous defer></script></body></html>
